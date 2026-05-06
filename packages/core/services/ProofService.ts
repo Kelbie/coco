@@ -851,7 +851,11 @@ export class ProofService {
   async recoverProofsFromOutputData(
     mintUrl: string,
     serializedOutputData: SerializedOutputData,
-    options?: { createdByOperationId?: string; persistRecoveredProofs?: boolean },
+    options?: {
+      createdByOperationId?: string;
+      createdByBatchId?: string;
+      persistRecoveredProofs?: boolean;
+    },
   ): Promise<Proof[]> {
     if (!mintUrl || mintUrl.trim().length === 0) {
       throw new ProofValidationError('mintUrl is required');
@@ -918,6 +922,7 @@ export class ProofService {
         mintUrl,
         mapProofToCoreProof(mintUrl, 'ready', unspentProofs, {
           createdByOperationId: options?.createdByOperationId,
+          createdByBatchId: options?.createdByBatchId,
         }),
       );
     }

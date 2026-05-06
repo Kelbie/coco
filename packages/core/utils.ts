@@ -146,13 +146,14 @@ export function mapProofToCoreProof(
   mintUrl: string,
   state: ProofState,
   proofs: Proof[],
-  options?: { createdByOperationId?: string },
+  options?: { createdByOperationId?: string; createdByBatchId?: string },
 ): CoreProof[] {
   return proofs.map((p) => ({
     ...p,
     mintUrl,
     state,
     createdByOperationId: options?.createdByOperationId,
+    createdByBatchId: options?.createdByBatchId,
   }));
 }
 

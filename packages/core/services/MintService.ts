@@ -10,6 +10,12 @@ import type { Logger } from '../logging/Logger.ts';
 import { normalizeMintUrl } from '../utils';
 
 const MINT_REFRESH_TTL_S = 60 * 5;
+const DEFAULT_BATCH_MINT_CAP = 100;
+
+export interface MintBatchCapability {
+  supported: boolean;
+  maxBatchSize: number;
+}
 
 export class MintService {
   private readonly mintRepo: MintRepository;
@@ -150,6 +156,27 @@ export class MintService {
     // ensureUpdatedMint already normalizes, but normalize here for consistency
     const { mint } = await this.ensureUpdatedMint(normalizeMintUrl(mintUrl));
     return mint.mintInfo;
+  }
+
+  async getMintBatchCapability(mintUrl: string, method: string): Promise<MintBatchCapability> {
+    const mintInfo = await this.getMintInfo(mintUrl);
+    const nut29 = (mintInfo as any).nuts?.[29] ?? (mintInfo as any).nuts?.['29'];
+    if (!nut29) {
+      return { supported: false, maxBatchSize: 0 };
+    }
+
+    const methods = Array.isArray(nut29.methods) ? nut29.methods : undefined;
+    if (methods && !methods.includes(method)) {
+      return { supported: false, maxBatchSize: 0 };
+    }
+
+    const advertisedMax = Number(nut29.max_batch_size);
+    const maxBatchSize =
+      Number.isFinite(advertisedMax) && advertisedMax > 0
+        ? Math.min(Math.floor(advertisedMax), DEFAULT_BATCH_MINT_CAP)
+        : DEFAULT_BATCH_MINT_CAP;
+
+    return { supported: true, maxBatchSize };
   }
 
   async getAllMints(): Promise<Mint[]> {

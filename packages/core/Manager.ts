@@ -789,6 +789,7 @@ export class Manager {
     const mintOperationService = new MintOperationService(
       mintHandlerProvider,
       repositories.mintOperationRepository,
+      repositories.mintBatchAttemptRepository,
       repositories.proofRepository,
       proofService,
       mintService,

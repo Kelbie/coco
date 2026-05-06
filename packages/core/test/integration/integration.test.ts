@@ -31,11 +31,10 @@ async function createRepositories() {
 
 runIntegrationTests(
   {
-    createRepositories,
+    createRepositories: createRepositories as any,
     mintUrl,
     logger: getTestLogger(),
     suiteName: 'Testnut Integration Tests',
   },
-  //@ts-expect-error stupid type error that no one cares about
-  { describe, it, beforeEach, afterEach, expect },
+  { describe, it, beforeEach, afterEach, expect } as any,
 );

@@ -13,6 +13,7 @@ import type {
   RepositoryTransactionScope,
   SendOperationRepository,
   MintOperationRepository,
+  MintBatchAttemptRepository,
   ReceiveOperationRepository,
 } from '..';
 import { MemoryAuthSessionRepository } from './MemoryAuthSessionRepository';
@@ -27,6 +28,7 @@ import { MemoryMintRepository } from './MemoryMintRepository';
 import { MemoryProofRepository } from './MemoryProofRepository';
 import { MemorySendOperationRepository } from './MemorySendOperationRepository';
 import { MemoryMintOperationRepository } from './MemoryMintOperationRepository';
+import { MemoryMintBatchAttemptRepository } from './MemoryMintBatchAttemptRepository';
 import { MemoryReceiveOperationRepository } from './MemoryReceiveOperationRepository';
 
 export class MemoryRepositories implements Repositories {
@@ -42,6 +44,7 @@ export class MemoryRepositories implements Repositories {
   meltOperationRepository: MeltOperationRepository;
   authSessionRepository: AuthSessionRepository;
   mintOperationRepository: MintOperationRepository;
+  mintBatchAttemptRepository: MintBatchAttemptRepository;
   receiveOperationRepository: ReceiveOperationRepository;
 
   constructor() {
@@ -57,6 +60,7 @@ export class MemoryRepositories implements Repositories {
     this.meltOperationRepository = new MemoryMeltOperationRepository();
     this.authSessionRepository = new MemoryAuthSessionRepository();
     this.mintOperationRepository = new MemoryMintOperationRepository();
+    this.mintBatchAttemptRepository = new MemoryMintBatchAttemptRepository();
     this.receiveOperationRepository = new MemoryReceiveOperationRepository();
   }
 
