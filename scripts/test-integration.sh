@@ -115,7 +115,7 @@ start_mint_container() {
         -e CDK_MINTD_FAKE_WALLET_MIN_DELAY=0 \
         -e CDK_MINTD_FAKE_WALLET_MAX_DELAY=0 \
         -e CDK_MINTD_MNEMONIC='abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about' \
-        cashubtc/mintd:0.15.1
+        cashubtc/mintd:v0.16.0
 
     # Wait for mint to be ready
     log_info "Waiting for mint to be ready..."
