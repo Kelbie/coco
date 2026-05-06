@@ -11,6 +11,7 @@ import type {
   MeltOperationRepository,
   AuthSessionRepository,
   MintOperationRepository,
+  MintBatchAttemptRepository,
   ReceiveOperationRepository,
   RepositoryTransactionScope,
 } from '@cashu/coco-core';
@@ -28,6 +29,7 @@ import { IdbSendOperationRepository } from './repositories/SendOperationReposito
 import { IdbMeltOperationRepository } from './repositories/MeltOperationRepository.ts';
 import { IdbAuthSessionRepository } from './repositories/AuthSessionRepository.ts';
 import { IdbMintOperationRepository } from './repositories/MintOperationRepository.ts';
+import { IdbMintBatchAttemptRepository } from './repositories/MintBatchAttemptRepository.ts';
 import { IdbReceiveOperationRepository } from './repositories/ReceiveOperationRepository.ts';
 
 export interface IndexedDbRepositoriesOptions extends IdbDbOptions {}
@@ -45,6 +47,7 @@ export class IndexedDbRepositories implements Repositories {
   readonly meltOperationRepository: MeltOperationRepository;
   readonly authSessionRepository: AuthSessionRepository;
   readonly mintOperationRepository: MintOperationRepository;
+  readonly mintBatchAttemptRepository: MintBatchAttemptRepository;
   readonly receiveOperationRepository: ReceiveOperationRepository;
   readonly db: IdbDb;
   private initialized = false;
@@ -63,6 +66,7 @@ export class IndexedDbRepositories implements Repositories {
     this.meltOperationRepository = new IdbMeltOperationRepository(this.db);
     this.authSessionRepository = new IdbAuthSessionRepository(this.db);
     this.mintOperationRepository = new IdbMintOperationRepository(this.db);
+    this.mintBatchAttemptRepository = new IdbMintBatchAttemptRepository(this.db);
     this.receiveOperationRepository = new IdbReceiveOperationRepository(this.db);
   }
 
@@ -93,6 +97,7 @@ export class IndexedDbRepositories implements Repositories {
         meltOperationRepository: new IdbMeltOperationRepository(scopedDb),
         authSessionRepository: new IdbAuthSessionRepository(scopedDb),
         mintOperationRepository: new IdbMintOperationRepository(scopedDb),
+        mintBatchAttemptRepository: new IdbMintBatchAttemptRepository(scopedDb),
         receiveOperationRepository: new IdbReceiveOperationRepository(scopedDb),
       };
       return fn(scopedRepositories);
@@ -115,5 +120,6 @@ export {
   IdbMeltOperationRepository,
   IdbAuthSessionRepository,
   IdbMintOperationRepository,
+  IdbMintBatchAttemptRepository,
   IdbReceiveOperationRepository,
 };

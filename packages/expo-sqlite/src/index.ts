@@ -11,6 +11,7 @@ import type {
   MeltOperationRepository,
   AuthSessionRepository,
   MintOperationRepository,
+  MintBatchAttemptRepository,
   ReceiveOperationRepository,
   RepositoryTransactionScope,
 } from '@cashu/coco-core';
@@ -28,6 +29,7 @@ import { ExpoSendOperationRepository } from './repositories/SendOperationReposit
 import { ExpoMeltOperationRepository } from './repositories/MeltOperationRepository.ts';
 import { ExpoAuthSessionRepository } from './repositories/AuthSessionRepository.ts';
 import { ExpoMintOperationRepository } from './repositories/MintOperationRepository.ts';
+import { ExpoMintBatchAttemptRepository } from './repositories/MintBatchAttemptRepository.ts';
 import { ExpoReceiveOperationRepository } from './repositories/ReceiveOperationRepository.ts';
 
 export interface ExpoSqliteRepositoriesOptions extends ExpoSqliteDbOptions {}
@@ -45,6 +47,7 @@ export class ExpoSqliteRepositories implements Repositories {
   readonly meltOperationRepository: MeltOperationRepository;
   readonly authSessionRepository: AuthSessionRepository;
   readonly mintOperationRepository: MintOperationRepository;
+  readonly mintBatchAttemptRepository: MintBatchAttemptRepository;
   readonly receiveOperationRepository: ReceiveOperationRepository;
   readonly db: ExpoSqliteDb;
 
@@ -62,6 +65,7 @@ export class ExpoSqliteRepositories implements Repositories {
     this.meltOperationRepository = new ExpoMeltOperationRepository(this.db);
     this.authSessionRepository = new ExpoAuthSessionRepository(this.db);
     this.mintOperationRepository = new ExpoMintOperationRepository(this.db);
+    this.mintBatchAttemptRepository = new ExpoMintBatchAttemptRepository(this.db);
     this.receiveOperationRepository = new ExpoReceiveOperationRepository(this.db);
   }
 
@@ -84,6 +88,7 @@ export class ExpoSqliteRepositories implements Repositories {
         meltOperationRepository: new ExpoMeltOperationRepository(txDb),
         authSessionRepository: new ExpoAuthSessionRepository(txDb),
         mintOperationRepository: new ExpoMintOperationRepository(txDb),
+        mintBatchAttemptRepository: new ExpoMintBatchAttemptRepository(txDb),
         receiveOperationRepository: new ExpoReceiveOperationRepository(txDb),
       };
 
@@ -109,6 +114,7 @@ export {
   ExpoMeltOperationRepository,
   ExpoAuthSessionRepository,
   ExpoMintOperationRepository,
+  ExpoMintBatchAttemptRepository,
   ExpoReceiveOperationRepository,
 };
 

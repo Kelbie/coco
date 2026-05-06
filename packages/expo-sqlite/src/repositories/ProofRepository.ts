@@ -18,6 +18,7 @@ interface ProofRow {
   state: ProofState;
   usedByOperationId: string | null;
   createdByOperationId: string | null;
+  createdByBatchId: string | null;
 }
 
 const MAX_PROOF_SECRET_LOOKUP_BATCH_SIZE = 900;
@@ -37,6 +38,7 @@ function rowToProof(r: ProofRow): CoreProof {
     state: r.state,
     ...(r.usedByOperationId ? { usedByOperationId: r.usedByOperationId } : {}),
     ...(r.createdByOperationId ? { createdByOperationId: r.createdByOperationId } : {}),
+    ...(r.createdByBatchId ? { createdByBatchId: r.createdByBatchId } : {}),
   };
 }
 
@@ -60,7 +62,7 @@ export class ExpoProofRepository implements ProofRepository {
         }
       }
       const insertSql =
-        'INSERT INTO coco_cashu_proofs (mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, createdAt, usedByOperationId, createdByOperationId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        'INSERT INTO coco_cashu_proofs (mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, createdAt, usedByOperationId, createdByOperationId, createdByBatchId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
       for (const p of proofs) {
         const dleqJson = p.dleq ? JSON.stringify(p.dleq) : null;
         const witnessJson = p.witness ? JSON.stringify(p.witness) : null;
@@ -76,6 +78,7 @@ export class ExpoProofRepository implements ProofRepository {
           now,
           p.usedByOperationId ?? null,
           p.createdByOperationId ?? null,
+          p.createdByBatchId ?? null,
         ]);
       }
     });
@@ -83,7 +86,7 @@ export class ExpoProofRepository implements ProofRepository {
 
   async getReadyProofs(mintUrl: string): Promise<CoreProof[]> {
     const rows = await this.db.all<ProofRow>(
-      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId FROM coco_cashu_proofs WHERE mintUrl = ? AND state = "ready"',
+      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId, createdByBatchId FROM coco_cashu_proofs WHERE mintUrl = ? AND state = "ready"',
       [mintUrl],
     );
     return rows.map(rowToProof);
@@ -92,7 +95,7 @@ export class ExpoProofRepository implements ProofRepository {
   async getInflightProofs(mintUrls?: string[]): Promise<CoreProof[]> {
     if (!mintUrls || mintUrls.length === 0) {
       const rows = await this.db.all<ProofRow>(
-        'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId FROM coco_cashu_proofs WHERE state = "inflight"',
+        'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId, createdByBatchId FROM coco_cashu_proofs WHERE state = "inflight"',
       );
       return rows.map(rowToProof);
     }
@@ -101,7 +104,7 @@ export class ExpoProofRepository implements ProofRepository {
     const uniqueMintUrls = Array.from(new Set(mintUrlList));
     const placeholders = uniqueMintUrls.map(() => '?').join(', ');
     const rows = await this.db.all<ProofRow>(
-      `SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId FROM coco_cashu_proofs WHERE state = "inflight" AND mintUrl IN (${placeholders})`,
+      `SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId, createdByBatchId FROM coco_cashu_proofs WHERE state = "inflight" AND mintUrl IN (${placeholders})`,
       uniqueMintUrls,
     );
     return rows.map(rowToProof);
@@ -109,14 +112,14 @@ export class ExpoProofRepository implements ProofRepository {
 
   async getAllReadyProofs(): Promise<CoreProof[]> {
     const rows = await this.db.all<ProofRow>(
-      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId FROM coco_cashu_proofs WHERE state = "ready"',
+      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId, createdByBatchId FROM coco_cashu_proofs WHERE state = "ready"',
     );
     return rows.map(rowToProof);
   }
 
   async getProofsByKeysetId(mintUrl: string, keysetId: string): Promise<CoreProof[]> {
     const rows = await this.db.all<ProofRow>(
-      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId FROM coco_cashu_proofs WHERE mintUrl = ? AND id = ? AND state = "ready"',
+      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId, createdByBatchId FROM coco_cashu_proofs WHERE mintUrl = ? AND id = ? AND state = "ready"',
       [mintUrl, keysetId],
     );
     return rows.map(rowToProof);
@@ -210,7 +213,7 @@ export class ExpoProofRepository implements ProofRepository {
 
   async getProofBySecret(mintUrl: string, secret: string): Promise<CoreProof | null> {
     const row = await this.db.get<ProofRow>(
-      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId FROM coco_cashu_proofs WHERE mintUrl = ? AND secret = ?',
+      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId, createdByBatchId FROM coco_cashu_proofs WHERE mintUrl = ? AND secret = ?',
       [mintUrl, secret],
     );
     return row ? rowToProof(row) : null;
@@ -228,7 +231,7 @@ export class ExpoProofRepository implements ProofRepository {
       const secretBatch = uniqueSecrets.slice(i, i + MAX_PROOF_SECRET_LOOKUP_BATCH_SIZE);
       const placeholders = secretBatch.map(() => '?').join(', ');
       const rows = await this.db.all<ProofRow>(
-        `SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId FROM coco_cashu_proofs WHERE mintUrl = ? AND secret IN (${placeholders})`,
+        `SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId, createdByBatchId FROM coco_cashu_proofs WHERE mintUrl = ? AND secret IN (${placeholders})`,
         [mintUrl, ...secretBatch],
       );
 
@@ -245,7 +248,7 @@ export class ExpoProofRepository implements ProofRepository {
 
   async getProofsByOperationId(mintUrl: string, operationId: string): Promise<CoreProof[]> {
     const rows = await this.db.all<ProofRow>(
-      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId FROM coco_cashu_proofs WHERE mintUrl = ? AND (usedByOperationId = ? OR createdByOperationId = ?)',
+      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId, createdByBatchId FROM coco_cashu_proofs WHERE mintUrl = ? AND (usedByOperationId = ? OR createdByOperationId = ?)',
       [mintUrl, operationId, operationId],
     );
     return rows.map(rowToProof);
@@ -253,7 +256,7 @@ export class ExpoProofRepository implements ProofRepository {
 
   async getAvailableProofs(mintUrl: string): Promise<CoreProof[]> {
     const rows = await this.db.all<ProofRow>(
-      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId FROM coco_cashu_proofs WHERE mintUrl = ? AND state = "ready" AND usedByOperationId IS NULL',
+      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId, createdByBatchId FROM coco_cashu_proofs WHERE mintUrl = ? AND state = "ready" AND usedByOperationId IS NULL',
       [mintUrl],
     );
     return rows.map(rowToProof);
@@ -261,7 +264,7 @@ export class ExpoProofRepository implements ProofRepository {
 
   async getReservedProofs(): Promise<CoreProof[]> {
     const rows = await this.db.all<ProofRow>(
-      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId FROM coco_cashu_proofs WHERE state = "ready" AND usedByOperationId IS NOT NULL',
+      'SELECT mintUrl, id, amount, secret, C, dleqJson, witnessJson, state, usedByOperationId, createdByOperationId, createdByBatchId FROM coco_cashu_proofs WHERE state = "ready" AND usedByOperationId IS NOT NULL',
     );
     return rows.map(rowToProof);
   }
