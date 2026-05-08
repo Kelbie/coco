@@ -722,12 +722,6 @@ export class Manager {
       meltQuoteLogger,
     );
 
-    const historyService = new HistoryService(
-      repositories.historyRepository,
-      this.eventBus,
-      historyLogger,
-    );
-
     const mintScopedLock = new MintScopedLock();
 
     const sendOperationLogger = this.getChildLogger('SendOperationService');
@@ -799,6 +793,12 @@ export class Manager {
       mintScopedLock,
     );
     const mintOperationRepository = repositories.mintOperationRepository;
+
+    const historyService = new HistoryService(
+      repositories.historyRepository,
+      this.eventBus,
+      historyLogger,
+    );
 
     const mintQuoteRepository = repositories.mintQuoteRepository;
 
