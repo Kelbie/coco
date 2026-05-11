@@ -20,6 +20,19 @@ import {
   type SerializedOutputData,
 } from '../../utils';
 
+export type ReceiveOperationSource =
+  | { type: 'manual-token' }
+  | {
+      type: 'payment-request';
+      requestOperationId: string;
+      requestId?: string;
+      attemptId: string;
+      transport: 'inband' | 'nostr' | 'post';
+      transportMessageId?: string;
+      senderPubkey?: string;
+      memo?: string;
+    };
+
 // ============================================================================
 // Base and Data Interfaces
 // ============================================================================
@@ -51,6 +64,9 @@ interface ReceiveOperationBase {
 
   /** Error message if the operation failed */
   error?: string;
+
+  /** Optional origin metadata for receives created by higher-level sagas. */
+  source?: ReceiveOperationSource;
 }
 
 /**
@@ -189,6 +205,7 @@ export function createReceiveOperation(
   amount: AmountLike,
   inputProofs: Proof[],
   unit: string,
+  source?: ReceiveOperationSource,
 ): InitReceiveOperation {
   const now = Date.now();
   return {
@@ -198,6 +215,7 @@ export function createReceiveOperation(
     unit,
     amount: toAmount(amount),
     inputProofs,
+    source,
     createdAt: now,
     updatedAt: now,
   };
