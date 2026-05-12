@@ -284,6 +284,10 @@ export interface PaymentRequestReceiveAttemptRepository {
     requestOperationId: string,
     payloadHash: string,
   ): Promise<PaymentRequestReceiveAttempt | null>;
+  getByRequestIdAndPayloadHash(
+    requestId: string,
+    payloadHash: string,
+  ): Promise<PaymentRequestReceiveAttempt | null>;
   getByState(state: PaymentRequestReceiveAttemptState): Promise<PaymentRequestReceiveAttempt[]>;
   delete(id: string): Promise<void>;
 }
