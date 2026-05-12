@@ -212,7 +212,7 @@ export interface PaymentRequestReceiveOperationRow {
   id: string;
   requestId?: string | null;
   encodedRequest: string;
-  state: 'draft' | 'active' | 'completed' | 'cancelled' | 'expired';
+  state: 'active' | 'completed' | 'cancelled' | 'expired';
   transport: 'inband' | 'nostr' | 'post';
   amount: string | number;
   unit: string;
